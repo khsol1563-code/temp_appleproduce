@@ -1,0 +1,2 @@
+@import "tailwindcss";
+html,body{margin:0;min-height:100%;background:#fbfaf5}.app-shell{min-height:100vh}.app-frame{display:block;width:100%;height:calc(100vh - 46px);border:0}.teacher-entry{display:flex;height:46px;align-items:center;justify-content:center;background:#13291f;color:#fff;text-decoration:none;font:700 14px/1 sans-serif}.teacher-entry:hover{background:#1d4735}
