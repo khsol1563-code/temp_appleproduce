@@ -22,7 +22,7 @@
       <button class="nav-btn" data-target="map-section">기후 지도</button>
       <button class="nav-btn" data-target="discussion">생각·토론</button>
     </nav>
-    <div class="context-pill" id="context-pill">영주 · 2012~2024</div>
+    <div class="context-pill" id="context-pill">영주 · 2012~2025</div>
   </header>
 
   <main id="main">
@@ -31,10 +31,9 @@
         <div class="hero-copy">
           <p class="eyebrow">초등 사회 × 과학 × 데이터 리터러시</p>
           <h1 id="hero-title">사과가<br><em>사라진다고?</em></h1>
-          <p class="hero-sub">영주·문경·영천의 13년 기온 기록과 경상북도 사과 자료를 직접 움직이며 살펴보는 데이터 탐구 여행</p>
+          <p class="hero-sub">영주·문경·영천의 14년 기온 기록과 경상북도 사과 자료를 직접 움직이며 살펴보는 데이터 탐구 여행</p>
           <div class="hero-actions">
             <button class="primary-btn" data-jump="climate">데이터 탐험 시작하기 <span>→</span></button>
-            <button class="ghost-btn" id="open-guide">5~7분 발표 흐름 보기</button>
           </div>
         </div>
         <div class="hero-visual" aria-label="사과와 기후를 표현한 일러스트레이션">
@@ -42,12 +41,12 @@
           <div class="hill hill-back"></div><div class="hill hill-front"></div>
           <div class="apple-orbit apple-one">🍎</div><div class="apple-orbit apple-two">🍏</div>
           <div class="thermometer"><span></span></div>
-          <div class="visual-label"><b>+2.2~2.4°C</b><small>세 도시의 2012→2024 변화</small></div>
+          <div class="visual-label"><b>+2.0~2.6°C</b><small>세 도시의 2012→2025 변화</small></div>
         </div>
       </div>
 
       <div class="scope-strip">
-        <div><span>기간</span><strong>2012—2024</strong><small>13개 연도</small></div>
+        <div><span>기간</span><strong>2012—2025</strong><small>14개 연도</small></div>
         <div><span>기온 관측</span><strong>3개 도시</strong><small>영주 · 문경 · 영천</small></div>
         <div><span>농업 자료</span><strong>경상북도 전체</strong><small>시군별 생산량 아님</small></div>
       </div>
@@ -85,10 +84,10 @@
         <p>도시와 지표, 기간을 바꿔 보세요. 그래프와 해석이 함께 달라집니다.</p>
       </div>
       <div class="control-panel" aria-label="기온 그래프 설정">
-        <label>도시<select id="city-select"><option>영주</option><option>문경</option><option>영천</option></select></label>
+        <div class="city-control"><span>도시</span><div class="segmented city-buttons" aria-label="도시 선택"><button type="button" data-city="영주" class="active">영주</button><button type="button" data-city="문경">문경</button><button type="button" data-city="영천">영천</button></div></div>
         <label>기온 지표<select id="metric-select"><option>연평균기온</option><option>평균최저기온</option><option>평균최고기온</option></select></label>
         <label class="range-control">시작 연도<input id="start-year" type="range" min="2012" max="2023" value="2012"><output id="start-year-output">2012</output></label>
-        <label class="range-control">마지막 연도<input id="end-year" type="range" min="2013" max="2024" value="2024"><output id="end-year-output">2024</output></label>
+        <label class="range-control">마지막 연도<input id="end-year" type="range" min="2013" max="2025" value="2025"><output id="end-year-output">2025</output></label>
         <label class="toggle"><input id="trend-toggle" type="checkbox" checked><span></span>추세선 보기</label>
         <label class="toggle"><input id="table-toggle" type="checkbox"><span></span>표 보기</label>
       </div>
@@ -96,7 +95,7 @@
       <div class="chart-card featured"><div class="chart-heading"><div><span>선택 도시</span><h3 id="city-chart-title">영주 연평균기온 변화</h3></div><div class="chart-key"><i class="red-line"></i>관측값 <i class="dash-line"></i>추세</div></div><div class="canvas-wrap large"><canvas id="city-chart"></canvas></div><p class="chart-caption" id="city-caption"></p></div>
       <div class="chart-grid two">
         <div class="chart-card"><h3>세 도시의 연평균기온 비교</h3><div class="canvas-wrap"><canvas id="all-city-chart"></canvas></div><p class="chart-caption">같은 연도라도 지역의 지형과 위치에 따라 기온이 다르게 나타납니다.</p></div>
-        <div class="chart-card"><h3>2012년 대비 2024년 변화량</h3><div class="canvas-wrap"><canvas id="change-chart"></canvas></div><p class="chart-caption">막대의 높이는 각 도시의 시작과 끝 값 차이를 나타냅니다.</p></div>
+        <div class="chart-card"><h3>2012년 대비 2025년 변화량</h3><div class="canvas-wrap"><canvas id="change-chart"></canvas></div><p class="chart-caption">막대의 높이는 각 도시의 시작과 끝 값 차이를 나타냅니다.</p></div>
       </div>
       <div class="chart-card"><h3 id="bundle-title">영주 연평균·최저·최고기온</h3><div class="canvas-wrap"><canvas id="bundle-chart"></canvas></div></div>
       <div class="data-table-wrap hidden" id="climate-table-wrap"><table id="climate-table"><thead><tr><th>연도</th><th>연평균기온</th><th>평균최저기온</th><th>평균최고기온</th></tr></thead><tbody></tbody></table></div>
@@ -122,10 +121,10 @@
         <div><p class="eyebrow blue">STEP 3 · 공간 탐색</p><h2 id="map-title">지도 위에서 보는<br>세 도시의 기온</h2></div>
         <p>원의 크기는 연평균기온, 색은 2012년 대비 변화량입니다. 시·군 경계는 공개 GeoJSON을 사용하고, 연결 실패 시 기본 지도로 안전하게 대체합니다.</p>
       </div>
-      <div class="map-year-control"><label for="map-year">살펴볼 연도 <strong id="map-year-label">2024</strong></label><input id="map-year" type="range" min="2012" max="2024" value="2024"><div class="year-ticks"><span>2012</span><span>2016</span><span>2020</span><span>2024</span></div></div>
+      <div class="map-year-control"><label for="map-year">살펴볼 연도 <strong id="map-year-label">2025</strong></label><input id="map-year" type="range" min="2012" max="2025" value="2025"><div class="year-ticks"><span>2012</span><span>2016</span><span>2020</span><span>2025</span></div></div>
       <div class="map-layout">
         <div id="map" role="application" aria-label="영주·문경·영천 기온 변화 지도"><div class="map-fallback" id="map-fallback"><span class="fallback-city city-yeongju">영주</span><span class="fallback-city city-mungeong">문경</span><span class="fallback-city city-yeongcheon">영천</span></div></div>
-        <div class="map-side"><h3><span id="map-side-year">2024</span>년 한눈에 보기</h3><div id="map-city-cards"></div><div class="legend"><span>2012년보다</span><div><i class="cool"></i>낮음</div><div><i class="mild"></i>비슷</div><div><i class="warm"></i>높음</div></div></div>
+        <div class="map-side"><h3><span id="map-side-year">2025</span>년 한눈에 보기</h3><div id="map-city-cards"></div><div class="legend"><span>2012년보다</span><div><i class="cool"></i>낮음</div><div><i class="mild"></i>비슷</div><div><i class="warm"></i>높음</div></div></div>
       </div>
       <p class="scope-note">현재 지도는 세 도시의 기온 변화를 나타냅니다. 지역별 사과 재배면적 자료를 추가하면 미래에는 사과 산지 이동도 함께 비교할 수 있습니다. 표시 지점은 도시 중심의 대표 위치입니다.</p>
     </section>
@@ -146,9 +145,7 @@
     </section>
   </main>
 
-  <footer><div><b>경북 사과 기후탐구소</b><p>기온: 영주·문경·영천 / 농업: 경상북도 전체 / 2012~2024</p></div><p>13년 자료는 장기 미래를 확정하지 않습니다. 새로운 자료와 질문으로 탐구를 이어 가세요.</p></footer>
-
-  <dialog id="presentation-dialog"><button class="dialog-close" aria-label="닫기">×</button><h2>5~7분 발표 흐름</h2><ol><li><b>40초</b> 주제와 핵심 질문 소개</li><li><b>1분 20초</b> 도시를 바꾸며 기온 변화 관찰</li><li><b>1분 30초</b> 재배면적·생산량 비교와 상관계수 설명</li><li><b>1분</b> 연도 슬라이더로 지도 탐색</li><li><b>1분</b> 학생 퀴즈와 해결책 활동 시연</li><li><b>40초</b> 상관관계의 한계와 수업 활용 정리</li></ol></dialog>
+  <footer><div><b>경북 사과 기후탐구소</b><p>기온: 영주·문경·영천 / 농업: 경상북도 전체 / 2012~2025</p></div><p>14년 자료는 장기 미래를 확정하지 않습니다. 새로운 자료와 질문으로 탐구를 이어 가세요.</p></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>

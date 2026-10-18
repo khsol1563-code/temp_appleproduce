@@ -25,7 +25,7 @@ def main() -> None:
             "coords": CITY_COORDS[city],
         }
     payload = {
-        "period": {"start": 2012, "end": 2024, "count": 13},
+        "period": {"start": 2012, "end": 2025, "count": 14},
         "cities": cities,
         "apple": {
             "records": apple.to_dict("records"),

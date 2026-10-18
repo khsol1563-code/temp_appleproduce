@@ -1,4 +1,4 @@
-const state = { data: null, city: "영주", metric: "연평균기온", start: 2012, end: 2024, trend: true, agri: "재배면적", mapYear: 2024, charts: {}, map: null, markers: null, boundary: null, solution: "" };
+const state = { data: null, city: "영주", metric: "연평균기온", start: 2012, end: 2025, trend: true, agri: "재배면적", mapYear: 2025, charts: {}, map: null, markers: null, boundary: null, solution: "" };
 const colors = { 영주: "#c7352e", 문경: "#287455", 영천: "#2f7fb5" };
 const metricKeys = { 연평균기온: "연평균기온", 평균최저기온: "평균최저기온", 평균최고기온: "평균최고기온" };
 const agriConfig = {
@@ -43,6 +43,7 @@ function replaceChart(id, config) {
 function metricCard(label,value,detail){return `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${detail}</small></article>`;}
 
 function renderClimate() {
+  $$('[data-city]').forEach(button=>button.classList.toggle('active',button.dataset.city===state.city));
   const rows=filteredCity(); const first=rows[0], last=rows.at(-1); const change=last.연평균기온-first.연평균기온;
   const fit=regression(rows.map(r=>r.연도),rows.map(r=>r.연평균기온));
   const hottest=rows.reduce((a,b)=>a.연평균기온>b.연평균기온?a:b);
@@ -102,10 +103,18 @@ function tempColor(change){return change<0?"#4388c7":change<.7?"#e5bd45":change<
 async function initMap() {
   if(!window.L){$("#map-fallback").style.display="block";return;}
   $("#map-fallback").style.display="none";
-  state.map=L.map("map",{scrollWheelZoom:false}).setView([36.35,128.65],8);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(state.map);
+  state.map=L.map("map",{scrollWheelZoom:false,zoomControl:true,attributionControl:false}).setView([36.35,128.65],8);
   state.markers=L.layerGroup().addTo(state.map);
-  try { const response=await fetch("data/gyeongbuk.geojson"); if(response.ok){const geo=await response.json();state.boundary=L.geoJSON(geo,{style:{color:"#5f7668",weight:1,fillColor:"#88ad91",fillOpacity:.08}}).addTo(state.map);state.map.fitBounds(state.boundary.getBounds(),{padding:[20,20]});} } catch(error){console.info("경계 GeoJSON을 불러오지 못해 기본 지도를 사용합니다.",error);}
+  try {
+    const response=await fetch("data/gyeongbuk.geojson");
+    if(!response.ok)throw new Error(`GeoJSON ${response.status}`);
+    const geo=await response.json();
+    state.boundary=L.geoJSON(geo,{style:{color:"#315f4a",weight:1.5,fillColor:"#b8d8bd",fillOpacity:.72}}).addTo(state.map);
+    state.map.fitBounds(state.boundary.getBounds(),{padding:[24,24]});
+  } catch(error){
+    console.info("경계 GeoJSON을 불러오지 못해 내장 대체 지도를 사용합니다.",error);
+    state.map.remove();state.map=null;state.markers=null;$("#map-fallback").style.display="block";
+  }
   renderMap();
 }
 function renderMap() {
@@ -117,11 +126,19 @@ function renderMap() {
 }
 
 function renderAll(){renderClimate();renderCompare();renderMap();}
-function showSection(id){$$('.page-section').forEach(section=>section.classList.toggle('active',section.id===id));$$('.nav-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.target===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='map-section'&&state.map)setTimeout(()=>state.map.invalidateSize(),120);}
+function showSection(id){
+  $$('.page-section').forEach(section=>section.classList.toggle('active',section.id===id));
+  $$('.nav-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.target===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='map-section'){
+    if(!state.map)initMap();
+    else setTimeout(()=>{state.map.invalidateSize();if(state.boundary)state.map.fitBounds(state.boundary.getBounds(),{padding:[24,24]});},120);
+  }
+}
 
 function bindEvents(){
   $$('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.jump)));
-  $('#city-select').addEventListener('change',e=>{state.city=e.target.value;renderAll();}); $('#metric-select').addEventListener('change',e=>{state.metric=e.target.value;renderClimate();});
+  $$('[data-city]').forEach(button=>button.addEventListener('click',()=>{state.city=button.dataset.city;renderAll();})); $('#metric-select').addEventListener('change',e=>{state.metric=e.target.value;renderClimate();});
   $('#start-year').addEventListener('input',e=>{state.start=Math.min(+e.target.value,state.end-1);e.target.value=state.start;$('#start-year-output').textContent=state.start;renderAll();});
   $('#end-year').addEventListener('input',e=>{state.end=Math.max(+e.target.value,state.start+1);e.target.value=state.end;$('#end-year-output').textContent=state.end;renderAll();});
   $('#trend-toggle').addEventListener('change',e=>{state.trend=e.target.checked;renderClimate();}); $('#table-toggle').addEventListener('change',e=>$('#climate-table-wrap').classList.toggle('hidden',!e.target.checked));
@@ -131,11 +148,10 @@ function bindEvents(){
   $('#check-answer').addEventListener('click',()=>{const chosen=$('input[name="quiz"]:checked');$('#quiz-feedback').textContent=!chosen?'먼저 문장을 하나 골라 주세요.':chosen.value==='correct'?'정답입니다! 자료의 경향과 직접 원인을 잘 구분했어요.':'다시 생각해 보세요. 상관관계만으로 직접 원인을 확정할 수는 없습니다.';});
   $$('.solution-options button').forEach(btn=>btn.addEventListener('click',()=>{$$('.solution-options button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.solution=btn.textContent;}));
   $('#build-proposal').addEventListener('click',()=>{const reason=$('#solution-reason').value.trim();$('#proposal-output').textContent=!state.solution?'먼저 해결책을 하나 골라 주세요.':!reason?'그 해결책을 고른 이유를 적어 주세요.':`나의 제안: “${state.solution}”이 중요합니다. 그 이유는 ${reason}`;});
-  const dialog=$('#presentation-dialog');$('#open-guide').addEventListener('click',()=>dialog.showModal());$('.dialog-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 async function boot(){
-  try{const response=await fetch('data/analysis.json');if(!response.ok)throw new Error(`데이터 응답 ${response.status}`);state.data=await response.json();Chart.defaults.font.family='Noto Sans KR';Chart.defaults.color='#526159';bindEvents();renderAll();await initMap();const saved=localStorage.getItem('apple-prediction');if(saved){const button=$(`.prediction[data-prediction="${saved}"]`);if(button)button.click();}}
+  try{const response=await fetch('data/analysis.json');if(!response.ok)throw new Error(`데이터 응답 ${response.status}`);state.data=await response.json();Chart.defaults.font.family='Noto Sans KR';Chart.defaults.color='#526159';bindEvents();renderAll();const saved=localStorage.getItem('apple-prediction');if(saved){const button=$(`.prediction[data-prediction="${saved}"]`);if(button)button.click();}}
   catch(error){console.error(error);document.body.innerHTML=`<main class="fatal"><h1>데이터를 불러오지 못했습니다.</h1><p>${error.message}</p><p>로컬에서는 파일을 직접 열지 말고 웹 서버로 실행해 주세요.</p></main>`;}
 }
 boot();

@@ -1,8 +1,8 @@
 {
   "period": {
     "start": 2012,
-    "end": 2024,
-    "count": 13
+    "end": 2025,
+    "count": 14
   },
   "cities": {
     "영주": {
@@ -84,24 +84,30 @@
           "연평균기온": 13.4,
           "평균최저기온": 8.3,
           "평균최고기온": 18.9
+        },
+        {
+          "연도": 2025,
+          "연평균기온": 13.2,
+          "평균최저기온": 8.1,
+          "평균최고기온": 18.7
         }
       ],
       "summary": {
         "start_year": 2012,
-        "end_year": 2024,
+        "end_year": 2025,
         "start_temp": 11.2,
-        "end_temp": 13.4,
-        "change": 2.200000000000001,
-        "period_average": 12.038461538461538,
-        "slope_per_year": 0.0813186813186805,
-        "change_per_decade": 0.813186813186805,
-        "intercept": -152.06263736263563,
+        "end_temp": 13.2,
+        "change": 2.0,
+        "period_average": 12.12142857142857,
+        "slope_per_year": 0.09824175824175622,
+        "change_per_decade": 0.9824175824175623,
+        "intercept": -186.17956043955635,
         "hottest_year": 2024,
         "hottest_temp": 13.4,
         "coldest_year": 2012,
         "coldest_temp": 11.2
       },
-      "correlation": -0.30212667041777486,
+      "correlation": -0.3842309087561196,
       "coords": {
         "lat": 36.8057,
         "lon": 128.6241,
@@ -187,24 +193,30 @@
           "연평균기온": 13.9,
           "평균최저기온": 9.1,
           "평균최고기온": 19.4
+        },
+        {
+          "연도": 2025,
+          "연평균기온": 13.8,
+          "평균최저기온": 9.0,
+          "평균최고기온": 19.9
         }
       ],
       "summary": {
         "start_year": 2012,
-        "end_year": 2024,
+        "end_year": 2025,
         "start_temp": 11.5,
-        "end_temp": 13.9,
-        "change": 2.4000000000000004,
-        "period_average": 12.53076923076923,
-        "slope_per_year": 0.12087912087911794,
-        "change_per_decade": 1.2087912087911794,
-        "intercept": -231.40329670329066,
+        "end_temp": 13.8,
+        "change": 2.3000000000000007,
+        "period_average": 12.621428571428572,
+        "slope_per_year": 0.13296703296703116,
+        "change_per_decade": 1.3296703296703116,
+        "intercept": -255.77252747252373,
         "hottest_year": 2024,
         "hottest_temp": 13.9,
         "coldest_year": 2012,
         "coldest_temp": 11.5
       },
-      "correlation": -0.6269174615749917,
+      "correlation": -0.6523789656299049,
       "coords": {
         "lat": 36.5865,
         "lon": 128.1867,
@@ -290,24 +302,30 @@
           "연평균기온": 14.7,
           "평균최저기온": 9.5,
           "평균최고기온": 20.5
+        },
+        {
+          "연도": 2025,
+          "연평균기온": 14.9,
+          "평균최저기온": 9.6,
+          "평균최고기온": 20.8
         }
       ],
       "summary": {
         "start_year": 2012,
-        "end_year": 2024,
+        "end_year": 2025,
         "start_temp": 12.3,
-        "end_temp": 14.7,
-        "change": 2.3999999999999986,
-        "period_average": 13.446153846153845,
-        "slope_per_year": 0.10604395604395528,
-        "change_per_decade": 1.0604395604395527,
-        "intercept": -200.55054945054775,
-        "hottest_year": 2024,
-        "hottest_temp": 14.7,
+        "end_temp": 14.9,
+        "change": 2.5999999999999996,
+        "period_average": 13.549999999999999,
+        "slope_per_year": 0.12637362637362493,
+        "change_per_decade": 1.2637362637362493,
+        "intercept": -241.53516483516182,
+        "hottest_year": 2025,
+        "hottest_temp": 14.9,
         "coldest_year": 2012,
         "coldest_temp": 12.3
       },
-      "correlation": -0.4328252147274821,
+      "correlation": -0.4929514793923915,
       "coords": {
         "lat": 35.9733,
         "lon": 128.9386,
@@ -394,20 +412,26 @@
         "재배면적_ha": 11875.0,
         "10a당생산량_kg": 2024.0,
         "총생산량_톤": 268999.0
+      },
+      {
+        "연도": 2025,
+        "재배면적_ha": 12022.0,
+        "10a당생산량_kg": 2077.0,
+        "총생산량_톤": 270105.0
       }
     ],
     "summary": {
       "start_area": 15332.0,
-      "end_area": 11875.0,
-      "area_change": -3457.0,
-      "area_change_pct": -22.54761283589878,
+      "end_area": 12022.0,
+      "area_change": -3310.0,
+      "area_change_pct": -21.588833811635798,
       "start_production": 320078.0,
-      "end_production": 268999.0,
-      "production_change": -51079.0,
-      "production_change_pct": -15.958297664944165,
+      "end_production": 270105.0,
+      "production_change": -49973.0,
+      "production_change_pct": -15.612756890507939,
       "start_yield": 2888.0,
-      "end_yield": 2024.0,
-      "yield_change_pct": -29.91689750692521,
+      "end_yield": 2077.0,
+      "yield_change_pct": -28.081717451523545,
       "max_year": 2015,
       "max_production": 332627.0,
       "min_year": 2024,

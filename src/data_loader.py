@@ -113,12 +113,12 @@ def load_all_data(data_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
         raise FileNotFoundError(f"필수 데이터 파일이 없습니다: {apple_path}")
     temperature = pd.concat(temperatures, ignore_index=True)
     apple = load_apple_csv(apple_path)
-    expected = set(range(2012, 2025))
+    expected = set(range(2012, 2026))
     for city in CITY_FILES:
         actual = set(temperature.loc[temperature["도시"] == city, "연도"])
         if actual != expected:
-            raise DataFormatError(f"{city} 기온 자료의 연도가 2012~2024와 일치하지 않습니다.")
+            raise DataFormatError(f"{city} 기온 자료의 연도가 2012~2025와 일치하지 않습니다.")
     if set(apple["연도"]) != expected:
-        raise DataFormatError("경북 사과 자료의 연도가 2012~2024와 일치하지 않습니다.")
+        raise DataFormatError("경북 사과 자료의 연도가 2012~2025와 일치하지 않습니다.")
     return temperature, apple
 

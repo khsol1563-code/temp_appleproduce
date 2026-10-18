@@ -69,7 +69,7 @@ with st.sidebar:
     st.header("탐구 조건")
     selected_city = st.selectbox("도시", list(CITY_FILES), index=0)
     selected_metric = st.selectbox("기온 지표", ["연평균기온", "평균최저기온", "평균최고기온"])
-    year_range = st.slider("분석 기간", 2012, 2024, (2012, 2024))
+    year_range = st.slider("분석 기간", 2012, 2025, (2012, 2025))
     show_trend = st.toggle("추세선 보기", value=True)
     show_table = st.toggle("데이터 표 보기", value=False)
     st.caption("농업 자료는 세 도시별 값이 아니라 경상북도 전체 자료입니다.")
@@ -85,13 +85,13 @@ with tabs[0]:
     st.subheader("대구 사과는 왜 경북 북부로 이동했을까요?")
     st.write("그래프와 지도를 직접 움직이며 기온과 경북 사과 재배의 변화를 탐구해 봅시다.")
     col1, col2, col3 = st.columns(3)
-    col1.metric("데이터 기간", "2012~2024", "13년")
+    col1.metric("데이터 기간", "2012~2025", "14년")
     col2.metric("기온 관측 지역", "3곳", "영주·문경·영천")
     col3.metric("농업 자료 범위", "경상북도 전체", "시군별 자료 아님")
     st.markdown('<div class="scope"><b>먼저 예상해 보세요.</b><br>기온이 높아지면 경북의 사과 재배면적은 늘어날까요, 줄어들까요?</div>', unsafe_allow_html=True)
     st.markdown("### 우리가 해결할 다섯 가지 질문")
     questions = [
-        "세 도시의 기온은 2012년부터 2024년까지 어떻게 변했을까요?",
+        "세 도시의 기온은 2012년부터 2025년까지 어떻게 변했을까요?",
         "같은 기간 경북 사과 재배면적과 총생산량은 어떻게 변했을까요?",
         "기온과 사과 생산량 사이에는 어떤 관계가 나타날까요?",
         "이 결과만으로 기온 상승이 직접 원인이라고 말할 수 있을까요?",
@@ -151,7 +151,7 @@ with tabs[2]:
         st.dataframe(filtered_apple, hide_index=True, use_container_width=True)
 
 with tabs[3]:
-    map_year = st.slider("지도에서 살펴볼 연도", 2012, 2024, 2024, key="map_year")
+    map_year = st.slider("지도에서 살펴볼 연도", 2012, 2025, 2025, key="map_year")
     st.caption(f"{map_year}년 도시별 기온 · 원의 크기는 연평균기온, 색은 2012년 대비 변화량을 나타냅니다.")
     climate_map = create_climate_map(temperature, map_year, GEOJSON_CACHE)
     st_folium(climate_map, height=570, use_container_width=True, returned_objects=[])
@@ -200,5 +200,5 @@ with tabs[4]:
         st.markdown("**도입** 예상 말하기 → **전개** 그래프·지도 탐색 → **정리** 사실과 추측 구분 → **평가** 근거를 들어 대응 방안 제안")
 
 st.divider()
-st.caption("자료 범위: 기온은 영주·문경·영천, 농업은 경상북도 전체 · 분석 기간 2012~2024년 · 장기 미래 예측에는 추가 자료가 필요합니다.")
+st.caption("자료 범위: 기온은 영주·문경·영천, 농업은 경상북도 전체 · 분석 기간 2012~2025년 · 장기 미래 예측에는 추가 자료가 필요합니다.")
 

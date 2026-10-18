@@ -79,7 +79,7 @@ def change_bar_chart(temperature: pd.DataFrame):
     changes = [item[1] for item in values]
     bars = ax.bar(cities, changes, color=[COLORS[city] for city in cities], width=0.6)
     ax.bar_label(bars, fmt="+%.1f°C", padding=4, fontweight="bold")
-    ax.set_title("2012년 대비 2024년 연평균기온 변화", fontweight="bold")
+    ax.set_title("2012년 대비 2025년 연평균기온 변화", fontweight="bold")
     ax.set_ylabel("변화량 (°C)")
     ax.grid(axis="y", linestyle=":", alpha=0.45)
     fig.tight_layout()
