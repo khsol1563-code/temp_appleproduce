@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="영주·문경·영천의 기온과 경북 사과 생산 자료를 탐구하는 초등 사회·과학 교육용 웹앱">
+  <title>사과가 사라진다고? | 경북 기후·사과 데이터 탐구</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="topbar">
+    <a class="brand" href="#story" aria-label="처음 화면으로 이동"><span class="brand-mark">🍎</span><span>경북 사과 기후탐구소</span></a>
+    <nav aria-label="주요 화면">
+      <button class="nav-btn active" data-target="story">이야기 시작</button>
+      <button class="nav-btn" data-target="climate">기온 변화</button>
+      <button class="nav-btn" data-target="compare">사과와 비교</button>
+      <button class="nav-btn" data-target="map-section">기후 지도</button>
+      <button class="nav-btn" data-target="discussion">생각·토론</button>
+    </nav>
+    <div class="context-pill" id="context-pill">영주 · 2012~2025</div>
+  </header>
+
+  <main id="main">
+    <section id="story" class="page-section active" aria-labelledby="hero-title">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">초등 사회 × 과학 × 데이터 리터러시</p>
+          <h1 id="hero-title">사과가<br><em>사라진다고?</em></h1>
+          <p class="hero-sub">영주·문경·영천의 14년 기온 기록과 경상북도 사과 자료를 직접 움직이며 살펴보는 데이터 탐구 여행</p>
+          <div class="hero-actions">
+            <button class="primary-btn" data-jump="climate">데이터 탐험 시작하기 <span>→</span></button>
+          </div>
+        </div>
+        <div class="hero-visual" aria-label="사과와 기후를 표현한 일러스트레이션">
+          <div class="sun"></div>
+          <div class="hill hill-back"></div><div class="hill hill-front"></div>
+          <div class="apple-orbit apple-one">🍎</div><div class="apple-orbit apple-two">🍏</div>
+          <div class="thermometer"><span></span></div>
+          <div class="visual-label"><b>+2.0~2.6°C</b><small>세 도시의 2012→2025 변화</small></div>
+        </div>
+      </div>
+
+      <div class="scope-strip">
+        <div><span>기간</span><strong>2012—2025</strong><small>14개 연도</small></div>
+        <div><span>기온 관측</span><strong>3개 도시</strong><small>영주 · 문경 · 영천</small></div>
+        <div><span>농업 자료</span><strong>경상북도 전체</strong><small>시군별 생산량 아님</small></div>
+      </div>
+
+      <div class="story-grid">
+        <article class="question-card accent-red">
+          <span class="card-number">01</span><h2>먼저 예상해 볼까요?</h2>
+          <p>기온이 높아지면 경북의 사과 재배면적은 늘어날까요, 줄어들까요?</p>
+          <div class="prediction-row">
+            <button class="prediction" data-prediction="늘어난다">늘어난다</button>
+            <button class="prediction" data-prediction="줄어든다">줄어든다</button>
+            <button class="prediction" data-prediction="자료가 더 필요하다">자료가 더 필요하다</button>
+          </div>
+          <p class="micro-feedback" id="prediction-feedback" aria-live="polite">선택한 생각은 브라우저 안에만 저장됩니다.</p>
+        </article>
+        <article class="question-card accent-green">
+          <span class="card-number">02</span><h2>이 자료로 무엇을 알 수 있을까요?</h2>
+          <ol class="research-questions">
+            <li>세 도시의 기온은 어떻게 변했을까?</li><li>경북 사과 재배면적과 생산량은 어떻게 변했을까?</li>
+            <li>두 자료는 어떤 관계를 보일까?</li><li>관계가 보이면 곧바로 원인이라고 말할 수 있을까?</li>
+          </ol>
+        </article>
+      </div>
+
+      <div class="word-help">
+        <div><span>연평균기온</span><p>한 해 동안 관측한 기온의 평균값</p></div>
+        <div><span>총생산량</span><p>한 해 동안 생산한 사과의 전체 무게</p></div>
+        <div><span>상관관계</span><p>두 값이 함께 변하는 경향을 나타낸 값</p></div>
+      </div>
+    </section>
+
+    <section id="climate" class="page-section" aria-labelledby="climate-title">
+      <div class="section-heading">
+        <div><p class="eyebrow green">STEP 1 · 기온 읽기</p><h2 id="climate-title">우리 지역의 기온은<br>어떻게 달라졌을까요?</h2></div>
+        <p>도시와 지표, 기간을 바꿔 보세요. 그래프와 해석이 함께 달라집니다.</p>
+      </div>
+      <div class="control-panel" aria-label="기온 그래프 설정">
+        <div class="city-control"><span>도시</span><div class="segmented city-buttons" aria-label="도시 선택"><button type="button" data-city="영주" class="active">영주</button><button type="button" data-city="문경">문경</button><button type="button" data-city="영천">영천</button></div></div>
+        <label>기온 지표<select id="metric-select"><option>연평균기온</option><option>평균최저기온</option><option>평균최고기온</option></select></label>
+        <label class="range-control">시작 연도<input id="start-year" type="range" min="2012" max="2023" value="2012"><output id="start-year-output">2012</output></label>
+        <label class="range-control">마지막 연도<input id="end-year" type="range" min="2013" max="2025" value="2025"><output id="end-year-output">2025</output></label>
+        <label class="toggle"><input id="trend-toggle" type="checkbox" checked><span></span>추세선 보기</label>
+        <label class="toggle"><input id="table-toggle" type="checkbox"><span></span>표 보기</label>
+      </div>
+      <div class="metric-grid" id="climate-metrics"></div>
+      <div class="chart-card featured"><div class="chart-heading"><div><span>선택 도시</span><h3 id="city-chart-title">영주 연평균기온 변화</h3></div><div class="chart-key"><i class="red-line"></i>관측값 <i class="dash-line"></i>추세</div></div><div class="canvas-wrap large"><canvas id="city-chart"></canvas></div><p class="chart-caption" id="city-caption"></p></div>
+      <div class="chart-grid two">
+        <div class="chart-card"><h3>세 도시의 연평균기온 비교</h3><div class="canvas-wrap"><canvas id="all-city-chart"></canvas></div><p class="chart-caption">같은 연도라도 지역의 지형과 위치에 따라 기온이 다르게 나타납니다.</p></div>
+        <div class="chart-card"><h3>2012년 대비 2025년 변화량</h3><div class="canvas-wrap"><canvas id="change-chart"></canvas></div><p class="chart-caption">막대의 높이는 각 도시의 시작과 끝 값 차이를 나타냅니다.</p></div>
+      </div>
+      <div class="chart-card"><h3 id="bundle-title">영주 연평균·최저·최고기온</h3><div class="canvas-wrap"><canvas id="bundle-chart"></canvas></div></div>
+      <div class="data-table-wrap hidden" id="climate-table-wrap"><table id="climate-table"><thead><tr><th>연도</th><th>연평균기온</th><th>평균최저기온</th><th>평균최고기온</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="compare" class="page-section" aria-labelledby="compare-title">
+      <div class="section-heading">
+        <div><p class="eyebrow orange">STEP 2 · 관계 탐색</p><h2 id="compare-title">기온과 경북 사과는<br>함께 변했을까요?</h2></div>
+        <p>농업 자료는 <b>경상북도 전체</b>입니다. 선택한 도시의 생산량으로 오해하지 않도록 제목과 단위를 확인하세요.</p>
+      </div>
+      <div class="metric-grid" id="apple-metrics"></div>
+      <div class="inline-control"><span>비교할 농업 지표</span><div class="segmented"><button data-agri="재배면적" class="active">재배면적</button><button data-agri="총생산량">총생산량</button><button data-agri="10a당 생산량">10a당 생산량</button></div></div>
+      <div class="chart-card featured"><h3 id="dual-title">영주 기온과 경북 사과 재배면적 비교</h3><div class="canvas-wrap large"><canvas id="dual-chart"></canvas></div><p class="chart-caption">서로 단위가 다른 두 자료는 왼쪽과 오른쪽 축을 나누어 읽습니다.</p></div>
+      <div class="chart-grid two unequal">
+        <div class="chart-card"><h3 id="scatter-title">영주 기온과 경북 사과 총생산량</h3><div class="canvas-wrap"><canvas id="scatter-chart"></canvas></div><p class="chart-caption">점 하나는 한 해를 뜻합니다. 점선은 전체적인 방향을 보여 줍니다.</p></div>
+        <div class="chart-card correlation-card"><h3>도시별 상관계수</h3><div class="canvas-wrap short"><canvas id="corr-chart"></canvas></div><div class="correlation-readout"><strong id="corr-value">−0.30</strong><span id="corr-label">약한 음의 상관 경향</span></div></div>
+      </div>
+      <aside class="caution"><div class="caution-icon">!</div><div><h3>함께 변했다고 해서 원인이라고 단정할 수 없어요.</h3><p>상관관계는 두 자료가 함께 변하는 경향을 보여 주지만, 한 가지 요인이 다른 결과의 직접적인 원인이라는 뜻은 아닙니다. 사과 생산량에는 강수량, 태풍, 병해충, 농가 수, 재배기술 등 여러 요인이 영향을 줄 수 있습니다.</p></div></aside>
+    </section>
+
+    <section id="map-section" class="page-section" aria-labelledby="map-title">
+      <div class="section-heading">
+        <div><p class="eyebrow blue">STEP 3 · 공간 탐색</p><h2 id="map-title">지도 위에서 보는<br>세 도시의 기온</h2></div>
+        <p>원의 크기는 연평균기온, 색은 2012년 대비 변화량입니다. 시·군 경계는 공개 GeoJSON을 사용하고, 연결 실패 시 기본 지도로 안전하게 대체합니다.</p>
+      </div>
+      <div class="map-year-control"><label for="map-year">살펴볼 연도 <strong id="map-year-label">2025</strong></label><input id="map-year" type="range" min="2012" max="2025" value="2025"><div class="year-ticks"><span>2012</span><span>2016</span><span>2020</span><span>2025</span></div></div>
+      <div class="map-layout">
+        <div id="map" role="application" aria-label="영주·문경·영천 기온 변화 지도"><div class="map-fallback" id="map-fallback"><span class="fallback-city city-yeongju">영주</span><span class="fallback-city city-mungeong">문경</span><span class="fallback-city city-yeongcheon">영천</span></div></div>
+        <div class="map-side"><h3><span id="map-side-year">2025</span>년 한눈에 보기</h3><div id="map-city-cards"></div><div class="legend"><span>2012년보다</span><div><i class="cool"></i>낮음</div><div><i class="mild"></i>비슷</div><div><i class="warm"></i>높음</div></div></div>
+      </div>
+      <p class="scope-note">현재 지도는 세 도시의 기온 변화를 나타냅니다. 지역별 사과 재배면적 자료를 추가하면 미래에는 사과 산지 이동도 함께 비교할 수 있습니다. 표시 지점은 도시 중심의 대표 위치입니다.</p>
+    </section>
+
+    <section id="discussion" class="page-section" aria-labelledby="discussion-title">
+      <div class="section-heading">
+        <div><p class="eyebrow purple">STEP 4 · 근거로 말하기</p><h2 id="discussion-title">나는 어떤 미래를<br>제안할 수 있을까요?</h2></div>
+        <p>자료에서 확인한 사실과 나의 생각을 구분하여 기록해 보세요. 작성 내용은 서버에 전송되지 않습니다.</p>
+      </div>
+      <div class="activity-grid">
+        <article class="activity-card"><span class="activity-step">활동 1</span><h3>그래프 관찰</h3><ul><li>가장 기온이 많이 오른 도시는 어디인가요?</li><li>경북 사과 재배면적은 어떻게 변했나요?</li><li>생산량이 매년 일정하게 줄지 않은 까닭은 무엇일까요?</li></ul><textarea id="observation" rows="5" placeholder="내가 발견한 사실을 적어 보세요."></textarea></article>
+        <article class="activity-card"><span class="activity-step">활동 2</span><h3>자료 해석</h3><fieldset id="quiz"><legend>가장 정확한 문장을 고르세요.</legend><label><input type="radio" name="quiz" value="wrong">기온이 오르면 생산량은 반드시 감소한다.</label><label><input type="radio" name="quiz" value="correct">감소 경향은 있지만 기온만으로 모든 변화를 설명할 수 없다.</label><label><input type="radio" name="quiz" value="wrong">음의 상관이면 기온이 유일한 원인이다.</label></fieldset><button class="primary-btn small" id="check-answer">정답 확인</button><p id="quiz-feedback" class="micro-feedback" aria-live="polite"></p></article>
+      </div>
+      <article class="solution-builder"><div><span class="activity-step">활동 3</span><h3>지역사회의 해결책을 골라 근거를 완성해 보세요.</h3></div><div class="solution-options" id="solution-options"><button>고온에 강한 품종</button><button>재배지역·품종 다양화</button><button>스마트농업</button><button>물 관리·그늘막</button><button>새로운 지역작물</button></div><textarea id="solution-reason" rows="3" placeholder="이 해결책이 중요한 이유를 그래프나 지도 근거와 함께 적어 보세요."></textarea><button class="primary-btn small" id="build-proposal">나의 제안 정리</button><div class="proposal-output" id="proposal-output" aria-live="polite">해결책과 이유를 선택하면 이곳에 나의 제안이 완성됩니다.</div></article>
+      <details class="teacher-guide"><summary>교사용 수업 활용 안내와 교육과정 연계</summary><div class="teacher-flow"><div><b>도입</b><span>사과 산지와 기후변화 예상하기</span></div><div><b>전개</b><span>그래프 비교와 지도 탐색</span></div><div><b>정리</b><span>사실과 추측 구분하기</span></div><div><b>평가</b><span>근거로 대응 방안 제안하기</span></div></div><ul><li>[4사09-02] 지역의 생산물 등을 알리려는 지역사회의 노력을 이해한다.</li><li>[4사10-01] 자연환경과 인문환경의 특징 및 변화를 탐구한다.</li><li>[4사10-02] 인간과 자연환경의 조화와 환경 보전의 중요성을 탐색한다.</li><li>[6사02-01] 기후 자료와 기후변화로 인한 생활 변화를 이해한다.</li><li>[4수04-02] 자료를 막대그래프나 꺾은선그래프로 나타내고 해석한다.</li></ul></details>
+
+      <div class="reference-gallery"><div class="gallery-heading"><p class="eyebrow">첨부 자료 활용</p><h3>사전 분석 그래프와 다시 비교해 보세요</h3><p>아래 이미지는 첨부된 참고 결과입니다. 위의 상호작용 그래프 수치는 CSV에서 다시 계산했습니다.</p></div><div class="gallery-track"><figure><img src="assets/tempchange_yeongju.jpg" alt="영주시 연도별 기온 변화 참고 그래프"><figcaption>영주 기온 변화</figcaption></figure><figure><img src="assets/appleproducechange_mun.jpeg" alt="문경 기온과 경북 사과 자료 비교 참고 그래프"><figcaption>문경 비교 분석</figcaption></figure><figure><img src="assets/appleproducechange_yeongchun.jpeg" alt="영천 기온과 경북 사과 자료 비교 참고 그래프"><figcaption>영천 비교 분석</figcaption></figure></div></div>
+    </section>
+  </main>
+
+  <footer><div><b>경북 사과 기후탐구소</b><p>기온: 영주·문경·영천 / 농업: 경상북도 전체 / 2012~2025</p></div><p>14년 자료는 장기 미래를 확정하지 않습니다. 새로운 자료와 질문으로 탐구를 이어 가세요.</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
