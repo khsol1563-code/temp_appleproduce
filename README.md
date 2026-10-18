@@ -1,92 +1,126 @@
-# 사과가 사라진다고?
+# vinext-starter
 
-영주·문경·영천의 2012~2025년 기온과 경상북도 전체 사과 재배면적·생산량을 비교하는 초등 사회·과학 데이터 리터러시 웹앱입니다.
+A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
 
-## 구현 구성
+## Prerequisites
 
-- `app.py`: Python/Streamlit 수업용 앱
-- `src/data_loader.py`: CP949·EUC-KR 등을 안전하게 처리하는 CSV 로더
-- `src/analysis.py`: 변화량, 증감률, 선형 추세, Pearson 상관계수 분석
-- `src/charts.py`: matplotlib·seaborn 기반 그래프
-- `src/map_view.py`: folium 기반 연도별 기온 지도와 GeoJSON 경계
-- `dist/`: Cloudflare Sites에 배포하는 상호작용형 정적 대시보드
-- `scripts/build_static_data.py`: CSV를 검증하고 배포용 JSON을 생성
-- `tests/`: 데이터 로더와 핵심 분석값 검증
+- Node.js `>=22.13.0`
+- Portable: Windows, macOS, or Linux; no Bash required
+- Managed Linux: managed Linux runtime with Bash, `flock`, `curl`, `sha256sum`, and GNU `timeout`
+- Git is required only for publishing
 
-Cloudflare 정적판은 서버에서 Python을 실행하지 않는 대신, 같은 CSV를 Python으로 전처리한 `analysis.json`을 사용합니다. 로컬 Streamlit판은 실행할 때마다 CSV를 다시 읽고 분석합니다.
+## Sites Lifecycle
 
-## 핵심 기능
+The Sites initializer copies the shared starter and selects managed-linux only when `SITES_MANAGED_LINUX_CONTAINER=1`; otherwise it selects portable. It saves the selection only in ignored `.sites-runtime/execution-profile.json`. Both profiles copy/configure first, then use the plugin's separate `install-dependencies.mjs` step to measure installation independently. Edit source under `app/` and follow the Sites skill for installation, preview, builds, and publishing.
 
-- 영주·문경·영천의 연평균·평균최저·평균최고기온 그래프
-- 도시·지표·기간 선택, 추세선과 원자료 표 보기
-- 경북 사과 재배면적·10a당 생산량·총생산량 비교
-- 도시별 기온과 경북 총생산량의 산점도·회귀 추세·상관계수
-- 2012~2025 연도 슬라이더를 갖춘 기온 지도
-- 학생 예상, 자료해석 퀴즈, 지역사회 대응 방안 활동
-- 교사용 5~7분 시연 흐름과 교육과정 연계
-- 첨부 그래프를 활용한 사전 분석 갤러리
+Run `node <plugin-root>/scripts/configure-execution-profile.mjs` only when the profile is unknown for the current checkout and environment. Profile changes do not alter tracked source or require reinstalling otherwise-valid dependencies; restart an existing preview to use the new selection. Do not commit or upload `.sites-runtime/`.
 
-## 중요 데이터 범위
+This starter does not use `wrangler.jsonc`.
 
-- 기온: 영주·문경·영천 관측자료
-- 농업: 경상북도 전체 사과 자료
-- 기간: 2012~2025년, 14개 연도
+`install:ci` runs `npm ci` once against the shared lockfile, disables parent-workspace discovery, and includes required dev/optional dependencies despite production/omit settings. Sharp defaults to prebuilt binaries unless explicitly configured otherwise. Do not overlap installers.
 
-시군별 사과 생산량 자료가 아니므로 지도에는 도시별 생산량을 표시하지 않습니다. 상관관계는 인과관계를 의미하지 않으며, 강수량·태풍·병해충·농가 수·재배기술 등 추가 변수가 필요합니다.
+- **Portable:** Preserve host HOME, npm cache, registry, proxy, temporary paths, retry/concurrency settings, and lifecycle-script policy. Use `--prefer-offline --no-audit --no-fund`.
+- **Managed Linux:** Use the existing project-local HOME/cache/tmp setup and Linux install lock, tarball preflight, and timeout. Restore the image-seeded npm cache only when its lockfile hash matches; retain network fallback. Builds keep their existing timeout. These helpers are not invoked by the portable profile.
 
-## 데이터 출처
+`scripts/sites-env.mjs` preserves the caller's HOME, npm cache, proxy, XDG, and temporary-directory configuration while defaulting Wrangler and Miniflare state to the checkout. If npm reports an unwritable cache, select a writable path with `npm_config_cache` for that install. The `dev` and `start` scripts also keep Wrangler logs inside the checkout. Generated `.sites-runtime/` and `.wrangler/` directories are disposable and ignored by Git.
 
-- 기온 CSV: 기상청 기상자료개방포털에서 수집한 연별 기온 자료
-- 사과 CSV: 사용자가 수집한 경상북도 사과 재배면적·생산량 자료
-- 행정구역 경계: [southkorea/southkorea-maps](https://github.com/southkorea/southkorea-maps)의 2018 시군 GeoJSON
-- 지도 타일: OpenStreetMap contributors
+On portable, `npm run dev` uses `vinext dev` with HMR, starting at port 5173. Vinext records the running server in ignored `.vinext/` state, rejects an ordinary duplicate launch, and recovers stale state after a stopped process; exactly simultaneous starts can race. Pass `--port <port>` or `--hostname <host>` after `npm run dev --` when needed; keep portable previews on loopback.
 
-최종 제출 전 원자료를 내려받은 정확한 기관·표명·URL·다운로드 날짜를 과제 기획서에 추가하세요.
+For browser QA on managed Linux, use `sites-preview start`. The project's dev script runs Vite and accepts the supervisor's `--host 0.0.0.0 --port 4173 --strictPort` arguments. The internal browser uses `http://terminal.local:4173/`; it is not a user-facing URL. The supervisor owns the preview lifecycle. The ignored local profile survives the supervisor's cleared process environment.
 
-## Windows에서 Streamlit 실행
+The portable profile simulates ChatGPT sign-in only for loopback development requests. Visit `/signin-with-chatgpt?return_to=/` to sign in as `local_seedy` (`seedy@sites.test`, display name `Seedy`) and `/signout-with-chatgpt?return_to=/` to sign out. The development cookie preserves that identity across server restarts. Mock auth is disabled in the managed-linux profile and is not included in production builds; hosted authentication remains dispatch-owned.
 
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-streamlit run app.py
+The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building, `npm start` runs that Worker locally through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server. Pass `npm start -- --port <port>` to select a different built-preview port.
+
+Local previews use Miniflare's placeholder `Request.cf` metadata without a network lookup. Set `CLOUDFLARE_CF_FETCH_ENABLED=true` to opt into fetching preview metadata; this setting does not change hosted request metadata.
+
+Local tool usage metrics are disabled by default. Set `WRANGLER_SEND_METRICS=true` to opt in.
+
+## Included Shape
+
+- edit site code under `app/`
+- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
+- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
+- `vite.config.ts` simulates declared bindings for local development
+- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
+- `db/schema.ts` starts intentionally empty
+- `@cloudflare/workers-types` provides Worker types; `cloudflare-env.d.ts` declares optional `DB`/`BUCKET` bindings—update these declarations if binding names change
+- `examples/d1/` contains an optional D1 example surface
+- `drizzle.config.ts` supports local migration generation when needed
+
+## Workspace Auth Headers
+
+Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
+
+The user ID is stable for the same user on the same Site and different across Sites. Use it as the durable user key; use email and name for display or contact purposes.
+
+SIWC-authenticated workspace sites may also receive `oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty `name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by `oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+
+Treat the full name as optional and fall back to email when it is absent:
+
+```tsx
+import { headers } from "next/headers";
+
+export default async function Home() {
+  const requestHeaders = await headers();
+  const userId = requestHeaders.get("oai-authenticated-user-id");
+  const email = requestHeaders.get("oai-authenticated-user-email");
+  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
+  const fullName =
+    encodedFullName &&
+    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
+      "percent-encoded-utf-8"
+      ? decodeURIComponent(encodedFullName)
+      : null;
+
+  const displayName = fullName ?? email;
+  // ...
+}
 ```
 
-브라우저에서 `http://localhost:8501`을 엽니다.
+## Optional Dispatch-Owned ChatGPT Sign-In
 
-## 정적 발표판 실행
+Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs optional or required ChatGPT sign-in:
 
-```powershell
-python scripts\build_static_data.py
-python -m http.server 8000 --directory dist
+- Use `getChatGPTUser()` for optional signed-in UI.
+- Use the returned `userId` as the stable user key for user-owned records; do not use email as a durable identifier.
+- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send anonymous visitors through Sign in with ChatGPT.
+- In a Server Component, start sign-in with `<a href={chatGPTSignInPath(returnTo)} target="_top">`. The auth helper module is server-only; do not import it into a Client Component.
+- Do not use `fetch`, XHR, a client-side router, or a framework link that can prefetch the sign-in route. SIWC must start as a top-level navigation.
+- Never request the AuthAPI authorization endpoint directly. The dispatch-owned `/signin-with-chatgpt` route must start the SIWC flow.
+- Use `chatGPTSignOutPath(returnTo)` for browser sign-out links or actions.
+- Pass a same-origin relative `returnTo` path for the destination after sign-in or sign-out. The helper validates and safely encodes it.
+- Mark protected pages with `export const dynamic = "force-dynamic"` because they depend on per-request identity headers.
+
+Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the OAuth cookies, and identity header injection. Do not implement app routes for those reserved paths. Routes that do not import and call the helper remain anonymous-compatible.
+
+SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platform's access policy controls for workspace-wide restrictions, or enforce explicit server-side membership or allowlist checks.
+
+Use SIWC for account pages, user-specific dashboards, saved records, and write actions tied to the current ChatGPT user. Leave public content anonymous.
+
+## Local D1 migrations
+
+For a D1-backed local preview, generate SQL with `npm run db:generate`. Build once through the Sites skill's build entrypoint (or `npm run build` for standalone use) to generate `dist/server/wrangler.json`, rebuilding if bindings change. From the project root, apply each pending migration in order:
+
+```sh
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_example.sql
 ```
 
-브라우저에서 `http://localhost:8000`을 엽니다. `dist/index.html`을 파일로 직접 열면 브라우저 보안정책 때문에 JSON을 읽지 못할 수 있습니다.
+Replace the filename with the pending migration and `DB` with your D1 binding name if different. Use `.wrangler/state`, not `.wrangler/state/v3`; Wrangler adds the versioned directories. Do not replay migrations already applied locally. This updates only the preview database; publishing applies production migrations separately.
 
-## 테스트
+## Diagnostic Commands
 
-```powershell
-python -m unittest discover -s tests -v
-```
+- `npm run install:ci`: perform the one locked dependency install
+- `npm run dev`: start the Vite/Vinext development server
+- `npm run build`: build the deployable Sites artifact
+- `npm run start`: preview the built Worker locally with D1/R2 support
+- `npm run db:generate`: generate Drizzle migrations after schema changes
 
-테스트는 14개 연도, 기온 기준값, 2012·2015·2025년 사과 기준값, 연도 결합, 증감률, 상관계수 범위 및 결측값 오류를 확인합니다.
+When using the Sites plugin, follow its skill instructions for installation, builds, and publishing. These npm commands remain available for standalone use.
 
-## Cloudflare 배포
+The portable build runs Vinext directly without a host `timeout` command. The managed-linux build uses `scripts/build-verified.sh` and its existing `SITES_BUILD_TIMEOUT` setting.
 
-`.openai/hosting.json`은 `dist`를 정적 배포 디렉터리로 지정합니다. 배포 전 `python scripts/build_static_data.py`를 다시 실행해 CSV 변경사항을 반영해야 합니다.
+## Learn More
 
-## 5~7분 발표 흐름
-
-1. 주제와 핵심 질문 소개
-2. 도시를 바꾸며 기온 변화 비교
-3. 재배면적·생산량과 상관계수 설명
-4. 지도 연도 슬라이더 시연
-5. 학생 퀴즈와 해결책 활동
-6. 상관관계의 한계와 수업 활용 정리
-
-## 향후 개선
-
-- 시군별 사과 재배면적·생산량 자료 추가
-- 강수량·폭염일수·태풍·병해충 자료 결합
-- 30년 이상 장기 자료로 분석 기간 확장
-- 학생 활동 결과를 저장하는 학급용 기능 추가
+- [vinext Documentation](https://github.com/cloudflare/vinext)
+- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)

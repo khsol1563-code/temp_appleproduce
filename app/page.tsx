@@ -1,0 +1,1 @@
+export default function Home(){return <main className="app-shell"><iframe className="app-frame" src="/lab/index.html" title="경북 사과 기후탐구소"/><a className="teacher-entry" href="/teacher" target="_top">교사용 결과 대시보드 · GPT 편집</a></main>}

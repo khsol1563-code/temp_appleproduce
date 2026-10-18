@@ -1,0 +1,3 @@
+import {env} from "cloudflare:workers";import {chatGPTSignOutPath,requireChatGPTUser} from "../chatgpt-auth";import TeacherDashboard from "./teacher-dashboard";
+export const dynamic="force-dynamic";
+export default async function TeacherPage(){const u=await requireChatGPTUser("/teacher"),ok=Boolean(env.OWNER_EMAIL&&u.email.toLowerCase()===env.OWNER_EMAIL.toLowerCase());if(!ok)return <main className="mx-auto max-w-xl p-10"><h1 className="text-3xl font-bold">접근 권한이 없습니다</h1><p className="mt-4">이 화면은 웹앱 소유자만 사용할 수 있습니다.</p><a className="mt-6 inline-block underline" href="/" target="_top">학생 화면으로 돌아가기</a></main>;return <TeacherDashboard displayName={u.displayName} signOutPath={chatGPTSignOutPath("/")}/>}
