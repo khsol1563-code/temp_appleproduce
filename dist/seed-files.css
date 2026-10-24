@@ -1,0 +1,9 @@
+.seed-files { margin-top: 1.35rem; padding: 1.25rem; border: 1px solid #cfe0d5; border-radius: 18px; background: #f5faf6; display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr); gap: 1.2rem; align-items: center; }
+.seed-badge { display: inline-block; padding: .35rem .65rem; border-radius: 999px; background: #dcecff; color: #2463a4; font-weight: 900; font-size: .78rem; }
+.seed-files h3 { margin: .55rem 0 .35rem; font-size: 1.16rem; }
+.seed-files p { margin: 0; color: #647069; font-size: .9rem; }
+.seed-links { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.seed-links a { display: flex; justify-content: space-between; gap: .7rem; align-items: center; border: 1px solid #bad1e7; border-radius: 12px; background: #fff; padding: .8rem .9rem; color: #1760a8; text-decoration: none; font-weight: 800; font-size: .88rem; }
+.seed-links a:hover, .seed-links a:focus { background: #eaf5ff; border-color: #4c91d1; }
+.seed-links b { white-space: nowrap; }
+@media (max-width: 720px) { .seed-files { grid-template-columns: 1fr; } .seed-links { grid-template-columns: 1fr; } }

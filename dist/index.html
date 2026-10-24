@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="seed-files.css">
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 바로가기</a>
@@ -56,6 +57,15 @@
         <p>ChatGPT나 서버로 보내지 않고, 선택한 CSV를 이 브라우저 안에서만 읽어 그래프를 다시 계산합니다.</p>
         <label>CSV 파일 선택 <input id="csv-upload" type="file" accept=".csv,text/csv"></label>
         <p class="micro-feedback" id="csv-status" aria-live="polite">기본 제공 자료를 사용 중입니다. 열: 구분, 지역, 연도, 연평균기온, 평균최저기온, 평균최고기온, 재배면적_ha, 총생산량_톤, 10a당생산량_kg</p>
+        <div class="seed-files" aria-label="씨앗파일 다운로드">
+          <div><span class="seed-badge">씨앗파일 4종</span><h3>원본 데이터 CSV</h3><p>누구나 내려받아 자신의 탐구 자료로 활용할 수 있습니다.</p></div>
+          <div class="seed-links">
+            <a href="data/seeds/data_appleproduce.csv" download>사과 재배면적·생산량 <b>CSV ↓</b></a>
+            <a href="data/seeds/data_temp_yeongju.csv" download>영주 기온 관측 <b>CSV ↓</b></a>
+            <a href="data/seeds/data_temp_mungeong.csv" download>문경 기온 관측 <b>CSV ↓</b></a>
+            <a href="data/seeds/data_temp_yeongcheon.csv" download>영천 기온 관측 <b>CSV ↓</b></a>
+          </div>
+        </div>
       </section>
 
       <div class="story-grid">
