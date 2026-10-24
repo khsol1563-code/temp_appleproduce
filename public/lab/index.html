@@ -51,6 +51,13 @@
         <div><span>농업 자료</span><strong>경상북도 전체</strong><small>시군별 생산량 아님</small></div>
       </div>
 
+      <section class="chart-card" aria-labelledby="csv-title">
+        <h2 id="csv-title">내 CSV로 다시 탐구하기</h2>
+        <p>ChatGPT나 서버로 보내지 않고, 선택한 CSV를 이 브라우저 안에서만 읽어 그래프를 다시 계산합니다.</p>
+        <label>CSV 파일 선택 <input id="csv-upload" type="file" accept=".csv,text/csv"></label>
+        <p class="micro-feedback" id="csv-status" aria-live="polite">기본 제공 자료를 사용 중입니다. 열: 구분, 지역, 연도, 연평균기온, 평균최저기온, 평균최고기온, 재배면적_ha, 총생산량_톤, 10a당생산량_kg</p>
+      </section>
+
       <div class="story-grid">
         <article class="question-card accent-red">
           <span class="card-number">01</span><h2>먼저 예상해 볼까요?</h2>

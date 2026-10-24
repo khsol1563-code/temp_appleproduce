@@ -12,6 +12,37 @@ const intFmt = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
+function parseCsv(text) {
+  const rows=[]; let row=[], cell="", quoted=false;
+  for (let i=0;i<text.length;i++) { const c=text[i], next=text[i+1];
+    if (c==='"' && quoted && next==='"') { cell+='"'; i++; }
+    else if (c==='"') quoted=!quoted;
+    else if (c===',' && !quoted) { row.push(cell.trim()); cell=""; }
+    else if ((c==='\n' || c==='\r') && !quoted) { if(c==='\r'&&next==='\n') i++; row.push(cell.trim()); if(row.some(Boolean)) rows.push(row); row=[]; cell=""; }
+    else cell+=c;
+  }
+  row.push(cell.trim()); if(row.some(Boolean)) rows.push(row);
+  const [header,...body]=rows; if(!header) throw new Error('CSV에 제목 행이 없습니다.');
+  const key=Object.fromEntries(header.map((name,i)=>[name.replace(/^\uFEFF/,''),i]));
+  const value=(r,name)=>r[key[name]]?.trim() ?? '';
+  if (!['구분','지역','연도'].every(name=>name in key)) throw new Error('구분, 지역, 연도 열이 필요합니다.');
+  const cities={}, apple=[];
+  body.forEach(r=>{ const type=value(r,'구분'), year=Number(value(r,'연도')); if(!Number.isFinite(year)) return;
+    if(type==='기온') { const city=value(r,'지역'); const record={연도:year,연평균기온:Number(value(r,'연평균기온')),평균최저기온:Number(value(r,'평균최저기온')),평균최고기온:Number(value(r,'평균최고기온'))};
+      if(city && Object.values(record).every(Number.isFinite)) (cities[city]??=[]).push(record);
+    } else if(type==='사과') { const record={연도:year,재배면적_ha:Number(value(r,'재배면적_ha')),총생산량_톤:Number(value(r,'총생산량_톤')),'10a당생산량_kg':Number(value(r,'10a당생산량_kg'))}; if(Object.values(record).every(Number.isFinite)) apple.push(record); }
+  });
+  if(Object.keys(cities).length<1 || apple.length<2) throw new Error('기온 행 1개 이상과 사과 행 2개 이상이 필요합니다.');
+  const fallbackCoords={영주:{lat:36.8057,lon:128.6241,note:'대표 위치'},문경:{lat:36.5867,lon:128.1868,note:'대표 위치'},영천:{lat:35.9732,lon:128.9386,note:'대표 위치'}};
+  return {cities:Object.fromEntries(Object.entries(cities).map(([name,records])=>[name,{records:records.sort((a,b)=>a.연도-b.연도),coords:fallbackCoords[name]??fallbackCoords.영주}])),apple:{records:apple.sort((a,b)=>a.연도-b.연도)}};
+}
+
+async function loadCsv(file) {
+  try { const data=parseCsv(await file.text()); const years=data.apple.records.map(r=>r.연도), min=Math.min(...years), max=Math.max(...years); state.data=data; state.city=Object.keys(data.cities)[0]; state.start=min; state.end=max; state.mapYear=max;
+    ['start-year','end-year','map-year'].forEach(id=>{const input=$('#'+id); input.min=min; input.max=max; input.value=id==='start-year'?min:max;}); $('#start-year-output').textContent=min; $('#end-year-output').textContent=max; $('#csv-status').textContent=`${file.name}을(를) 이 브라우저에서만 반영했습니다. 서버 전송이나 AI 호출은 없습니다.`; renderDataViews(); renderMap();
+  } catch(error) { $('#csv-status').textContent=`CSV를 읽지 못했습니다: ${error.message}`; }
+}
+
 function filteredCity(city = state.city) {
   return state.data.cities[city].records.filter(row => row.연도 >= state.start && row.연도 <= state.end);
 }
@@ -137,6 +168,7 @@ function showSection(id){
 }
 
 function bindEvents(){
+  $('#csv-upload')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(file)loadCsv(file);});
   $$('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.jump)));
   $$('[data-city]').forEach(button=>button.addEventListener('click',()=>{state.city=button.dataset.city;renderAll();})); $('#metric-select').addEventListener('change',e=>{state.metric=e.target.value;renderClimate();});
   $('#start-year').addEventListener('input',e=>{state.start=Math.min(+e.target.value,state.end-1);e.target.value=state.start;$('#start-year-output').textContent=state.start;renderAll();});
@@ -170,8 +202,7 @@ function renderProposalTable(){const body=$('#proposal-table tbody');if(!body)re
 async function submitProposal(){
   const name=$('#student-name').value.trim(),reason=$('#solution-reason').value.trim();if(!name||!state.solution||!reason){$('#proposal-output').textContent='학생 이름, 해결책, 제안 근거를 모두 입력해 주세요.';return;}
   const payload={name,solution:state.solution,reason,observation:$('#observation').value.trim()};$('#submit-proposal').disabled=true;
-  try{const response=await fetch('/api/submissions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error('제출 실패');const row={...payload,createdAt:new Date().toLocaleString('ko-KR')};const rows=proposalRows();rows.unshift(row);localStorage.setItem('apple-class-proposals',JSON.stringify(rows.slice(0,20)));renderProposalTable();$('#proposal-output').textContent=`${name} 학생의 제안이 선생님 대시보드에 제출되었습니다.`;}
-  catch{$('#proposal-output').textContent='제출하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';}finally{$('#submit-proposal').disabled=false;}
+  const row={...payload,createdAt:new Date().toLocaleString('ko-KR')};const rows=proposalRows();rows.unshift(row);localStorage.setItem('apple-class-proposals',JSON.stringify(rows.slice(0,20)));renderProposalTable();$('#proposal-output').textContent=`${name} 학생의 제안은 이 브라우저에만 저장되었습니다.`;$('#submit-proposal').disabled=false;
 }
 
 async function boot(){

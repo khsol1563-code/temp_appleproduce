@@ -1,5 +1,4 @@
 {
   "project_id": "appgprj_6ad40ea752c0819189e880220c2a11b3",
-  "d1": "DB",
-  "r2": null
+  "static": { "directory": "public/lab" }
 }
