@@ -51,6 +51,13 @@
         <div><span>농업 자료</span><strong>경상북도 전체</strong><small>시군별 생산량 아님</small></div>
       </div>
 
+      <section class="chart-card" aria-labelledby="csv-title">
+        <h2 id="csv-title">내 CSV로 다시 탐구하기</h2>
+        <p>ChatGPT나 서버로 보내지 않고, 선택한 CSV를 이 브라우저 안에서만 읽어 그래프를 다시 계산합니다.</p>
+        <label>CSV 파일 선택 <input id="csv-upload" type="file" accept=".csv,text/csv"></label>
+        <p class="micro-feedback" id="csv-status" aria-live="polite">기본 제공 자료를 사용 중입니다. 열: 구분, 지역, 연도, 연평균기온, 평균최저기온, 평균최고기온, 재배면적_ha, 총생산량_톤, 10a당생산량_kg</p>
+      </section>
+
       <div class="story-grid">
         <article class="question-card accent-red">
           <span class="card-number">01</span><h2>먼저 예상해 볼까요?</h2>
@@ -132,20 +139,20 @@
     <section id="discussion" class="page-section" aria-labelledby="discussion-title">
       <div class="section-heading">
         <div><p class="eyebrow purple">STEP 4 · 근거로 말하기</p><h2 id="discussion-title">나는 어떤 미래를<br>제안할 수 있을까요?</h2></div>
-        <p>자료에서 확인한 사실과 나의 생각을 구분하여 기록해 보세요. 작성 내용은 서버에 전송되지 않습니다.</p>
+        <p>자료에서 확인한 사실과 나의 생각을 구분하여 기록해 보세요. 제출한 제안은 선생님 결과 대시보드에 안전하게 모입니다.</p>
       </div>
       <div class="activity-grid">
-        <article class="activity-card"><span class="activity-step">활동 1</span><h3>그래프 관찰</h3><ul><li>가장 기온이 많이 오른 도시는 어디인가요?</li><li>경북 사과 재배면적은 어떻게 변했나요?</li><li>생산량이 매년 일정하게 줄지 않은 까닭은 무엇일까요?</li></ul><textarea id="observation" rows="5" placeholder="내가 발견한 사실을 적어 보세요."></textarea></article>
+        <article class="activity-card"><span class="activity-step">활동 1</span><h3>그래프 관찰</h3><ul><li>가장 기온이 많이 오른 도시는 어디인가요?</li><li>기온이 오르며 경북의 사과 재배 면적과 사과 생산량은 어떻게 변했나요?</li><li>사과 생산량에 변화를 주는 요인은 '기온 변화' 말고 또 무엇이 있을까요?</li></ul><textarea id="observation" rows="5" placeholder="내가 발견한 사실을 적어 보세요."></textarea></article>
         <article class="activity-card"><span class="activity-step">활동 2</span><h3>자료 해석</h3><fieldset id="quiz"><legend>가장 정확한 문장을 고르세요.</legend><label><input type="radio" name="quiz" value="wrong">기온이 오르면 생산량은 반드시 감소한다.</label><label><input type="radio" name="quiz" value="correct">감소 경향은 있지만 기온만으로 모든 변화를 설명할 수 없다.</label><label><input type="radio" name="quiz" value="wrong">음의 상관이면 기온이 유일한 원인이다.</label></fieldset><button class="primary-btn small" id="check-answer">정답 확인</button><p id="quiz-feedback" class="micro-feedback" aria-live="polite"></p></article>
       </div>
-      <article class="solution-builder"><div><span class="activity-step">활동 3</span><h3>지역사회의 해결책을 골라 근거를 완성해 보세요.</h3></div><div class="solution-options" id="solution-options"><button>고온에 강한 품종</button><button>재배지역·품종 다양화</button><button>스마트농업</button><button>물 관리·그늘막</button><button>새로운 지역작물</button></div><textarea id="solution-reason" rows="3" placeholder="이 해결책이 중요한 이유를 그래프나 지도 근거와 함께 적어 보세요."></textarea><button class="primary-btn small" id="build-proposal">나의 제안 정리</button><div class="proposal-output" id="proposal-output" aria-live="polite">해결책과 이유를 선택하면 이곳에 나의 제안이 완성됩니다.</div></article>
+      <article class="solution-builder"><div><span class="activity-step">활동 3</span><h3>지역사회의 해결책을 골라 근거를 완성해 보세요.</h3></div><label class="student-name-label" for="student-name">학생 이름<input id="student-name" maxlength="30" placeholder="이름을 입력하세요"></label><div class="solution-options" id="solution-options"><button>고온에 강한 품종</button><button>재배지역·품종 다양화</button><button>스마트농업</button><button>물 관리·그늘막</button><button>새로운 지역작물</button></div><textarea id="solution-reason" rows="3" placeholder="이 해결책이 중요한 이유를 그래프나 지도 근거와 함께 적어 보세요."></textarea><div class="proposal-actions"><button class="primary-btn small" id="build-proposal">나의 제안 정리</button><button class="primary-btn small secondary" id="submit-proposal">선생님께 제출</button></div><div class="proposal-output" id="proposal-output" aria-live="polite">해결책과 이유를 선택하면 이곳에 나의 제안이 완성됩니다.</div><div class="class-table-wrap"><h4>이 브라우저에서 제출한 나의 제안</h4><table id="proposal-table"><thead><tr><th>학생 이름</th><th>선택한 해결책</th><th>제안 근거</th><th>제출 시각</th></tr></thead><tbody></tbody></table></div></article>
       <details class="teacher-guide"><summary>교사용 수업 활용 안내와 교육과정 연계</summary><div class="teacher-flow"><div><b>도입</b><span>사과 산지와 기후변화 예상하기</span></div><div><b>전개</b><span>그래프 비교와 지도 탐색</span></div><div><b>정리</b><span>사실과 추측 구분하기</span></div><div><b>평가</b><span>근거로 대응 방안 제안하기</span></div></div><ul><li>[4사09-02] 지역의 생산물 등을 알리려는 지역사회의 노력을 이해한다.</li><li>[4사10-01] 자연환경과 인문환경의 특징 및 변화를 탐구한다.</li><li>[4사10-02] 인간과 자연환경의 조화와 환경 보전의 중요성을 탐색한다.</li><li>[6사02-01] 기후 자료와 기후변화로 인한 생활 변화를 이해한다.</li><li>[4수04-02] 자료를 막대그래프나 꺾은선그래프로 나타내고 해석한다.</li></ul></details>
 
       <div class="reference-gallery"><div class="gallery-heading"><p class="eyebrow">첨부 자료 활용</p><h3>사전 분석 그래프와 다시 비교해 보세요</h3><p>아래 이미지는 첨부된 참고 결과입니다. 위의 상호작용 그래프 수치는 CSV에서 다시 계산했습니다.</p></div><div class="gallery-track"><figure><img src="assets/tempchange_yeongju.jpg" alt="영주시 연도별 기온 변화 참고 그래프"><figcaption>영주 기온 변화</figcaption></figure><figure><img src="assets/appleproducechange_mun.jpeg" alt="문경 기온과 경북 사과 자료 비교 참고 그래프"><figcaption>문경 비교 분석</figcaption></figure><figure><img src="assets/appleproducechange_yeongchun.jpeg" alt="영천 기온과 경북 사과 자료 비교 참고 그래프"><figcaption>영천 비교 분석</figcaption></figure></div></div>
     </section>
   </main>
 
-  <footer><div><b>경북 사과 기후탐구소</b><p>기온: 영주·문경·영천 / 농업: 경상북도 전체 / 2012~2025</p></div><p>14년 자료는 장기 미래를 확정하지 않습니다. 새로운 자료와 질문으로 탐구를 이어 가세요.</p></footer>
+  <div class="result-overlay" id="result-overlay" aria-live="assertive" aria-hidden="true"><div class="result-symbol" id="result-symbol"></div><strong id="result-message"></strong><div class="particle-field" id="particle-field"></div></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
