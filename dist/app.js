@@ -12,7 +12,7 @@ const intFmt = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
-function parseCsv(text) {
+function csvRows(text) {
   const rows=[]; let row=[], cell="", quoted=false;
   for (let i=0;i<text.length;i++) { const c=text[i], next=text[i+1];
     if (c==='"' && quoted && next==='"') { cell+='"'; i++; }
@@ -22,6 +22,11 @@ function parseCsv(text) {
     else cell+=c;
   }
   row.push(cell.trim()); if(row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function parseCsv(text) {
+  const rows=csvRows(text);
   const [header,...body]=rows; if(!header) throw new Error('CSV에 제목 행이 없습니다.');
   const key=Object.fromEntries(header.map((name,i)=>[name.replace(/^\uFEFF/,''),i]));
   const value=(r,name)=>r[key[name]]?.trim() ?? '';
@@ -37,9 +42,32 @@ function parseCsv(text) {
   return {cities:Object.fromEntries(Object.entries(cities).map(([name,records])=>[name,{records:records.sort((a,b)=>a.연도-b.연도),coords:fallbackCoords[name]??fallbackCoords.영주}])),apple:{records:apple.sort((a,b)=>a.연도-b.연도)}};
 }
 
+function numeric(value) { const n=Number(String(value??'').replace(/[^0-9.+-]/g,'')); return Number.isFinite(n)?n:null; }
+function cityFromFileName(name) { const value=name.toLowerCase(); return value.includes('yeongju')?'영주':value.includes('mungeong')?'문경':value.includes('yeongcheon')?'영천':null; }
+function parseSeedTemperature(rows,fileName) {
+  const city=cityFromFileName(fileName); if(!city) return null;
+  const records=rows.map(row=>({연도:numeric(row[0]),연평균기온:numeric(row[2]),평균최저기온:numeric(row[3]),평균최고기온:numeric(row[4])})).filter(row=>row.연도>=1900&&row.연도<=2100&&Object.values(row).every(Number.isFinite));
+  if(records.length<2) return null;
+  return {city,records:records.sort((a,b)=>a.연도-b.연도)};
+}
+function parseSeedApple(rows,fileName) {
+  if(!fileName.toLowerCase().includes('appleproduce')) return null;
+  const yearRow=rows.find(row=>row.filter(value=>numeric(value)>=1900&&numeric(value)<=2100).length>=6);
+  const dataRow=[...rows].reverse().find(row=>row.filter(value=>numeric(value)!==null).length>=18);
+  if(!yearRow||!dataRow) return null;
+  const records=[];
+  for(let i=1;i<yearRow.length;i+=3){const year=numeric(yearRow[i]),area=numeric(dataRow[i]),yieldPer10a=numeric(dataRow[i+1]),production=numeric(dataRow[i+2]);if(year&&area!==null&&yieldPer10a!==null&&production!==null)records.push({연도:year,재배면적_ha:area,총생산량_톤:production,'10a당생산량_kg':yieldPer10a});}
+  return records.length>=2?records.sort((a,b)=>a.연도-b.연도):null;
+}
+function refreshForUploadedData() {
+  const years=[...Object.values(state.data.cities).flatMap(item=>item.records.map(row=>row.연도)),...state.data.apple.records.map(row=>row.연도)]; const min=Math.min(...years),max=Math.max(...years);
+  state.start=min;state.end=max;state.mapYear=max;['start-year','end-year','map-year'].forEach(id=>{const input=$('#'+id);input.min=min;input.max=max;input.value=id==='start-year'?min:max;});$('#start-year-output').textContent=min;$('#end-year-output').textContent=max;renderDataViews();renderMap();
+}
 async function loadCsv(file) {
-  try { const data=parseCsv(await file.text()); const years=data.apple.records.map(r=>r.연도), min=Math.min(...years), max=Math.max(...years); state.data=data; state.city=Object.keys(data.cities)[0]; state.start=min; state.end=max; state.mapYear=max;
-    ['start-year','end-year','map-year'].forEach(id=>{const input=$('#'+id); input.min=min; input.max=max; input.value=id==='start-year'?min:max;}); $('#start-year-output').textContent=min; $('#end-year-output').textContent=max; $('#csv-status').textContent=`${file.name}을(를) 이 브라우저에서만 반영했습니다. 서버 전송이나 AI 호출은 없습니다.`; renderDataViews(); renderMap();
+  try { const bytes=await file.arrayBuffer(); const text=new TextDecoder('euc-kr').decode(bytes); const rows=csvRows(text); const temperature=parseSeedTemperature(rows,file.name),apple=parseSeedApple(rows,file.name);
+    if(temperature){state.data.cities[temperature.city].records=temperature.records;state.city=temperature.city;refreshForUploadedData();$('#csv-status').textContent=`${file.name}의 숫자를 ${temperature.city} 기온 그래프에 바로 반영했습니다. 이 파일은 브라우저 밖으로 전송되지 않습니다.`;return;}
+    if(apple){state.data.apple.records=apple;refreshForUploadedData();$('#csv-status').textContent=`${file.name}의 숫자를 사과 비교 그래프에 바로 반영했습니다. 이 파일은 브라우저 밖으로 전송되지 않습니다.`;return;}
+    const data=parseCsv(text); state.data=data; state.city=Object.keys(data.cities)[0]; refreshForUploadedData(); $('#csv-status').textContent=`${file.name}을(를) 이 브라우저에서만 반영했습니다. 서버 전송이나 AI 호출은 없습니다.`;
   } catch(error) { $('#csv-status').textContent=`CSV를 읽지 못했습니다: ${error.message}`; }
 }
 
