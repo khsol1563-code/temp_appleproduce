@@ -209,7 +209,10 @@ function bindEvents(){
   $$('.solution-options button').forEach(btn=>btn.addEventListener('click',()=>{$$('.solution-options button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.solution=btn.textContent;}));
   $('#build-proposal').addEventListener('click',()=>{const reason=$('#solution-reason').value.trim();$('#proposal-output').textContent=!state.solution?'먼저 해결책을 하나 골라 주세요.':!reason?'그 해결책을 고른 이유를 적어 주세요.':`나의 제안: “${state.solution}”이 중요합니다. 그 이유는 ${reason}`;});
   $('#submit-proposal').addEventListener('click',submitProposal);
-  renderProposalTable();
+  $('#teacher-export').addEventListener('click',openTeacherExport);
+  $('#teacher-export-close').addEventListener('click',closeTeacherExport);
+  $('#teacher-export-confirm').addEventListener('click',verifyTeacherPassword);
+  $('#teacher-download').addEventListener('click',downloadProposalCsv);
 }
 
 function playTone(correct){
@@ -225,12 +228,15 @@ function showQuizResult(correct){
   setTimeout(()=>overlay.classList.add('fade-symbol'),2000);setTimeout(()=>{overlay.className='result-overlay';overlay.setAttribute('aria-hidden','true');field.innerHTML='';$$('input[name="quiz"]').forEach(input=>input.checked=false);},3000);
 }
 function proposalRows(){try{return JSON.parse(localStorage.getItem('apple-class-proposals')||'[]');}catch{return [];}}
-function escapeHtml(value){return String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));}
-function renderProposalTable(){const body=$('#proposal-table tbody');if(!body)return;const rows=proposalRows();body.innerHTML=rows.length?rows.map(row=>`<tr><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.solution)}</td><td>${escapeHtml(row.reason)}</td><td>${escapeHtml(row.createdAt)}</td></tr>`).join(''):'<tr><td colspan="4">아직 제출한 제안이 없습니다.</td></tr>';}
+function openTeacherExport(){const dialog=$('#teacher-export-dialog');$('#teacher-password').value='';$('#teacher-export-message').textContent='';$('#teacher-download').hidden=true;dialog.showModal();$('#teacher-password').focus();}
+function closeTeacherExport(){$('#teacher-export-dialog').close();}
+function verifyTeacherPassword(){const message=$('#teacher-export-message'),download=$('#teacher-download');if($('#teacher-password').value!=='9999'){message.textContent='비밀번호가 일치하지 않습니다.';download.hidden=true;return;}const count=proposalRows().length;message.textContent=`수합된 학생 답변 ${count}건을 확인했습니다. CSV를 내려받으세요.`;download.hidden=false;}
+function csvCell(value){return `"${String(value??'').replaceAll('"','""')}"`;}
+function downloadProposalCsv(){const rows=proposalRows();const header=['학생이름','학생제안','제안근거','관찰기록','제출시각'];const body=rows.map(row=>[row.name,row.solution,row.reason,row.observation,row.createdAt].map(csvCell).join(','));const csv=`\uFEFF${header.join(',')}\n${body.join('\n')}`;const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='학생답변수합.csv';link.click();URL.revokeObjectURL(link.href);}
 async function submitProposal(){
   const name=$('#student-name').value.trim(),reason=$('#solution-reason').value.trim();if(!name||!state.solution||!reason){$('#proposal-output').textContent='학생 이름, 해결책, 제안 근거를 모두 입력해 주세요.';return;}
   const payload={name,solution:state.solution,reason,observation:$('#observation').value.trim()};$('#submit-proposal').disabled=true;
-  const row={...payload,createdAt:new Date().toLocaleString('ko-KR')};const rows=proposalRows();rows.unshift(row);localStorage.setItem('apple-class-proposals',JSON.stringify(rows.slice(0,20)));renderProposalTable();$('#proposal-output').textContent=`${name} 학생의 제안은 이 브라우저에만 저장되었습니다.`;$('#submit-proposal').disabled=false;
+  const row={...payload,createdAt:new Date().toLocaleString('ko-KR')};const rows=proposalRows();rows.unshift(row);localStorage.setItem('apple-class-proposals',JSON.stringify(rows.slice(0,100)));$('#proposal-output').textContent=`${name} 학생의 제안이 제출되었습니다.`;$('#submit-proposal').disabled=false;
 }
 
 async function boot(){
