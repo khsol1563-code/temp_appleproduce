@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="seed-files.css">
 </head>
@@ -136,9 +135,9 @@
         <div><p class="eyebrow blue">STEP 3 · 공간 탐색</p><h2 id="map-title">지도 위에서 보는<br>세 도시의 기온</h2></div>
         <p>원의 크기는 연평균기온, 색은 2012년 대비 변화량입니다. 시·군 경계는 공개 GeoJSON을 사용하고, 연결 실패 시 기본 지도로 안전하게 대체합니다.</p>
       </div>
-      <div class="map-year-control"><label for="map-year">살펴볼 연도 <strong id="map-year-label">2025</strong></label><input id="map-year" type="range" min="2012" max="2025" value="2025"><div class="year-ticks"><span>2012</span><span>2016</span><span>2020</span><span>2025</span></div></div>
+      <div class="map-year-control"><label for="map-year">기후변화 연도 스케일 <strong id="map-year-label">2025</strong></label><input id="map-year" type="range" min="2012" max="2025" step="1" value="2025" aria-describedby="map-year-help"><div class="year-ticks"><span>2012</span><span>2015</span><span>2018</span><span>2021</span><span>2025</span></div><p id="map-year-help">지도 위치는 고정됩니다. 연도 막대를 움직여 각 지역의 기온 변화를 비교해 보세요.</p></div>
       <div class="map-layout">
-        <div id="map" role="application" aria-label="영주·문경·영천 기온 변화 지도"><div class="map-fallback" id="map-fallback"><span class="fallback-city city-yeongju">영주</span><span class="fallback-city city-mungeong">문경</span><span class="fallback-city city-yeongcheon">영천</span></div></div>
+        <div id="map" role="img" aria-label="위치가 고정된 영주·문경·영천 기온 변화 지도"><div class="map-fallback" id="map-fallback"><span class="fallback-city city-yeongju">영주</span><span class="fallback-city city-mungeong">문경</span><span class="fallback-city city-yeongcheon">영천</span></div></div>
         <div class="map-side"><h3><span id="map-side-year">2025</span>년 한눈에 보기</h3><div id="map-city-cards"></div><div class="legend"><span>2012년보다</span><div><i class="cool"></i>낮음</div><div><i class="mild"></i>비슷</div><div><i class="warm"></i>높음</div></div></div>
       </div>
       <p class="scope-note">현재 지도는 세 도시의 기온 변화를 나타냅니다. 지역별 사과 재배면적 자료를 추가하면 미래에는 사과 산지 이동도 함께 비교할 수 있습니다. 표시 지점은 도시 중심의 대표 위치입니다.</p>
@@ -163,8 +162,6 @@
   <dialog id="teacher-export-dialog" aria-labelledby="teacher-export-title"><button class="dialog-close" id="teacher-export-close" type="button" aria-label="닫기">×</button><h2 id="teacher-export-title">학생 답변 수합</h2><p>교사용 비밀번호를 입력하면 이 브라우저에 제출된 학생 답변을 CSV 파일로 내려받을 수 있습니다.</p><label class="teacher-password-label" for="teacher-password">비밀번호<input id="teacher-password" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label><p id="teacher-export-message" class="micro-feedback" aria-live="polite"></p><button class="primary-btn small" id="teacher-export-confirm" type="button">확인</button><button class="primary-btn small" id="teacher-download" type="button" hidden>CSV 다운로드</button></dialog>
   <div class="result-overlay" id="result-overlay" aria-live="assertive" aria-hidden="true"><div class="result-symbol" id="result-symbol"></div><strong id="result-message"></strong><div class="particle-field" id="particle-field"></div></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="app.js"></script>
 </body>
 </html>

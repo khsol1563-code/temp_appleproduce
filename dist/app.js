@@ -1,4 +1,4 @@
-const state = { data: null, city: "영주", metric: "연평균기온", start: 2012, end: 2025, trend: true, agri: "재배면적", mapYear: 2025, charts: {}, map: null, markers: null, boundary: null, solution: "" };
+const state = { data: null, city: "영주", metric: "연평균기온", start: 2012, end: 2025, trend: true, agri: "재배면적", mapYear: 2025, charts: {}, map: null, markers: null, boundary: null, solution: "", activeSection: "story" };
 const colors = { 영주: "#c7352e", 문경: "#287455", 영천: "#2f7fb5" };
 const metricKeys = { 연평균기온: "연평균기온", 평균최저기온: "평균최저기온", 평균최고기온: "평균최고기온" };
 const agriConfig = {
@@ -11,6 +11,35 @@ const fmt = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 1 });
 const intFmt = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
+const libraryPromises = {};
+const sectionPromises = {};
+const dirtyViews = { climate: true, compare: true };
+const chartIds = { climate: ["city-chart","all-city-chart","change-chart","bundle-chart"], compare: ["dual-chart","scatter-chart","corr-chart"] };
+let dataPromise;
+let scheduledView = null;
+
+function loadScript(url, globalName) {
+  if (window[globalName]) return Promise.resolve(window[globalName]);
+  if (!libraryPromises[url]) libraryPromises[url] = new Promise((resolve, reject) => {
+    const script = document.createElement("script"); script.src = url; script.async = true;
+    script.onload = () => window[globalName] ? resolve(window[globalName]) : reject(new Error(`${globalName} 초기화 실패`));
+    script.onerror = () => reject(new Error(`${url} 불러오기 실패`));
+    document.head.appendChild(script);
+  });
+  return libraryPromises[url];
+}
+function loadStyle(url) {
+  if (document.querySelector(`link[href="${url}"]`)) return;
+  const link = document.createElement("link"); link.rel = "stylesheet"; link.href = url; document.head.appendChild(link);
+}
+async function ensureCharts() {
+  await loadScript("https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js", "Chart");
+  Chart.defaults.font.family = "Noto Sans KR"; Chart.defaults.color = "#526159";
+}
+async function ensureMapLibrary() {
+  loadStyle("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+  await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", "L");
+}
 
 function csvRows(text) {
   const rows=[]; let row=[], cell="", quoted=false;
@@ -61,7 +90,7 @@ function parseSeedApple(rows,fileName) {
 }
 function refreshForUploadedData() {
   const years=[...Object.values(state.data.cities).flatMap(item=>item.records.map(row=>row.연도)),...state.data.apple.records.map(row=>row.연도)]; const min=Math.min(...years),max=Math.max(...years);
-  state.start=min;state.end=max;state.mapYear=max;['start-year','end-year','map-year'].forEach(id=>{const input=$('#'+id);input.min=min;input.max=max;input.value=id==='start-year'?min:max;});$('#start-year-output').textContent=min;$('#end-year-output').textContent=max;renderDataViews();renderMap();
+  state.start=min;state.end=max;state.mapYear=max;['start-year','end-year','map-year'].forEach(id=>{const input=$('#'+id);input.min=min;input.max=max;input.value=id==='start-year'?min:max;});$('#start-year-output').textContent=min;$('#end-year-output').textContent=max;scheduleDataView('climate');scheduleDataView('compare');if(state.activeSection==='map-section')renderMap();
 }
 async function loadCsv(file) {
   try { const bytes=await file.arrayBuffer(); const text=new TextDecoder('euc-kr').decode(bytes); const rows=csvRows(text); const temperature=parseSeedTemperature(rows,file.name),apple=parseSeedApple(rows,file.name);
@@ -160,9 +189,10 @@ function renderCompare() {
 
 function tempColor(change){return change<0?"#4388c7":change<.7?"#e5bd45":change<1.5?"#eb8b3d":"#d34435";}
 async function initMap() {
-  if(!window.L){$("#map-fallback").style.display="block";return;}
+  try { await ensureMapLibrary(); }
+  catch(error) { console.info("지도 라이브러리를 불러오지 못했습니다.",error);$("#map-fallback").style.display="block";renderMap();return; }
   $("#map-fallback").style.display="none";
-  state.map=L.map("map",{scrollWheelZoom:false,zoomControl:true,attributionControl:false}).setView([36.35,128.65],8);
+  state.map=L.map("map",{scrollWheelZoom:false,dragging:false,touchZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,zoomControl:false,attributionControl:false,preferCanvas:true}).setView([36.35,128.65],8);
   state.markers=L.layerGroup().addTo(state.map);
   try {
     const response=await fetch("data/gyeongbuk.geojson");
@@ -184,26 +214,45 @@ function renderMap() {
   $("#map-city-cards").innerHTML=cards.join("");
 }
 
-function renderAll(){renderClimate();renderCompare();renderMap();}
+async function renderSection(id) {
+  if (id === "story" || id === "discussion") return;
+  if (sectionPromises[id]) return sectionPromises[id];
+  sectionPromises[id] = (async () => {
+    await dataPromise;
+    if (id === "climate" || id === "compare") {
+      await ensureCharts();
+      if (dirtyViews[id]) { id === "climate" ? renderClimate() : renderCompare(); dirtyViews[id] = false; }
+      else chartIds[id].forEach(chartId => state.charts[chartId]?.resize());
+    } else if (id === "map-section") {
+      if (!state.map) await initMap(); else requestAnimationFrame(() => state.map.invalidateSize());
+    }
+  })().catch(error => { console.error(error); throw error; }).finally(() => { delete sectionPromises[id]; });
+  return sectionPromises[id];
+}
+function scheduleDataView(view) {
+  dirtyViews[view] = true;
+  const target = view === "climate" ? "climate" : "compare";
+  if (state.activeSection !== target || scheduledView === target) return;
+  scheduledView = target;
+  requestAnimationFrame(() => { scheduledView = null; renderSection(target); });
+}
 function showSection(id){
+  state.activeSection=id;
   $$('.page-section').forEach(section=>section.classList.toggle('active',section.id===id));
   $$('.nav-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.target===id));
   window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='map-section'){
-    if(!state.map)initMap();
-    else setTimeout(()=>{state.map.invalidateSize();if(state.boundary)state.map.fitBounds(state.boundary.getBounds(),{padding:[24,24]});},120);
-  }
+  renderSection(id);
 }
 
 function bindEvents(){
   $('#csv-upload')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(file)loadCsv(file);});
   $$('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.jump)));
-  $$('[data-city]').forEach(button=>button.addEventListener('click',()=>{state.city=button.dataset.city;renderAll();})); $('#metric-select').addEventListener('change',e=>{state.metric=e.target.value;renderClimate();});
-  $('#start-year').addEventListener('input',e=>{state.start=Math.min(+e.target.value,state.end-1);e.target.value=state.start;$('#start-year-output').textContent=state.start;renderAll();});
-  $('#end-year').addEventListener('input',e=>{state.end=Math.max(+e.target.value,state.start+1);e.target.value=state.end;$('#end-year-output').textContent=state.end;renderAll();});
-  $('#trend-toggle').addEventListener('change',e=>{state.trend=e.target.checked;renderClimate();}); $('#table-toggle').addEventListener('change',e=>$('#climate-table-wrap').classList.toggle('hidden',!e.target.checked));
-  $$('[data-agri]').forEach(btn=>btn.addEventListener('click',()=>{$$('[data-agri]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.agri=btn.dataset.agri;renderCompare();}));
-  $('#map-year').addEventListener('input',e=>{state.mapYear=+e.target.value;renderMap();});
+  $$('[data-city]').forEach(button=>button.addEventListener('click',()=>{state.city=button.dataset.city;scheduleDataView('climate');scheduleDataView('compare');})); $('#metric-select').addEventListener('change',e=>{state.metric=e.target.value;scheduleDataView('climate');});
+  $('#start-year').addEventListener('input',e=>{state.start=Math.min(+e.target.value,state.end-1);e.target.value=state.start;$('#start-year-output').textContent=state.start;scheduleDataView('climate');scheduleDataView('compare');});
+  $('#end-year').addEventListener('input',e=>{state.end=Math.max(+e.target.value,state.start+1);e.target.value=state.end;$('#end-year-output').textContent=state.end;scheduleDataView('climate');scheduleDataView('compare');});
+  $('#trend-toggle').addEventListener('change',e=>{state.trend=e.target.checked;scheduleDataView('climate');}); $('#table-toggle').addEventListener('change',e=>$('#climate-table-wrap').classList.toggle('hidden',!e.target.checked));
+  $$('[data-agri]').forEach(btn=>btn.addEventListener('click',()=>{$$('[data-agri]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.agri=btn.dataset.agri;scheduleDataView('compare');}));
+  $('#map-year').addEventListener('input',e=>{state.mapYear=+e.target.value;requestAnimationFrame(renderMap);});
   $$('.prediction').forEach(btn=>btn.addEventListener('click',()=>{$$('.prediction').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');localStorage.setItem('apple-prediction',btn.dataset.prediction);$('#prediction-feedback').textContent=`나의 예상: “${btn.dataset.prediction}”. 이제 그래프로 확인해 보세요.`;}));
   $('#check-answer').addEventListener('click',()=>{const chosen=$('input[name="quiz"]:checked');if(!chosen){$('#quiz-feedback').textContent='먼저 문장을 하나 골라 주세요.';return;}showQuizResult(chosen.value==='correct');});
   $$('.solution-options button').forEach(btn=>btn.addEventListener('click',()=>{$$('.solution-options button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.solution=btn.textContent;}));
@@ -240,7 +289,9 @@ async function submitProposal(){
 }
 
 async function boot(){
-  try{const response=await fetch('data/analysis.json');if(!response.ok)throw new Error(`데이터 응답 ${response.status}`);state.data=await response.json();Chart.defaults.font.family='Noto Sans KR';Chart.defaults.color='#526159';bindEvents();renderAll();const saved=localStorage.getItem('apple-prediction');if(saved){const button=$(`.prediction[data-prediction="${saved}"]`);if(button)button.click();}}
+  bindEvents();const saved=localStorage.getItem('apple-prediction');if(saved){const button=$(`.prediction[data-prediction="${saved}"]`);if(button)button.click();}
+  dataPromise=(async()=>{const response=await fetch('data/analysis.json');if(!response.ok)throw new Error(`데이터 응답 ${response.status}`);state.data=await response.json();return state.data;})();
+  try{await dataPromise;if(state.activeSection!=="story")renderSection(state.activeSection);}
   catch(error){console.error(error);document.body.innerHTML=`<main class="fatal"><h1>데이터를 불러오지 못했습니다.</h1><p>${error.message}</p><p>로컬에서는 파일을 직접 열지 말고 웹 서버로 실행해 주세요.</p></main>`;}
 }
 boot();
